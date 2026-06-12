@@ -27,18 +27,18 @@ To keep the cutthroat spirit of Arrakis alive, this tool features an optional **
    git clone https://github.com/comfuzio/Open-Dune-Insurance.git
    cd Open-Dune-Insurance
    ```
-   Install the required Python dependencies:
+2. Install the required Python dependencies:
 
 ```Bash
 pip install -r requirements.txt
 ```
-Copy the example configuration file and input your database credentials:
+3. Copy the example configuration file and input your database credentials:
 
 ```Bash
 cp config.example.yaml config.yaml
 nano config.yaml
 ```
-Usage
+## Usage
 Run the script from the command line, passing the desired action and the target player's exact character name.
 
 1. Backup Player Gear
@@ -60,15 +60,15 @@ Applies a Spice Melange cost and a percentage-based durability drop to the gear 
 python3 dune_insurance.py --restore-pro "Paul Atreides"
 ```
 
-Configuration (config.yaml)
+4. Configuration (config.yaml)
 Define your database connection parameters here so the script can reach the game's data.
 
 ```YAML
 database:
   host: "127.0.0.1"      # Change if DB is on a different pod/container
   port: 5432
-  user: "postgres"
-  password: "your_db_password"
+  user: "dune"
+  password: "dune"
   name: "dune"
 
 insurance_rules:
@@ -76,7 +76,8 @@ insurance_rules:
   penalty_pct: 0.15      # Durability loss (15%) applied to gear during Pro Restore
 ```
 
-License
+## License
+
 This project is proudly licensed under the GNU AGPLv3.
 
 We believe that tools extending server functionality should remain fully open. If you modify this tool, incorporate it into a web panel, or host it over a network, you must make your modified source code available to your users.
