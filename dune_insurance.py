@@ -90,10 +90,20 @@ def restore_player_gear(player_name, apply_pro_rules=False, penalty_pct=0.15, sp
     cursor = conn.cursor()
     
     try:
+        # --- ONLINE SAFETY CHECK ---
+        # Checks if the player is currently in-game to prevent RAM desync overwrites.
+        # Note: 'is_online' might be named differently depending on Funcom's exact schema updates.
+        cursor.execute("SELECT is_online FROM characters WHERE character_name = %s;", (player_name,))
+        status_result = cursor.fetchone()
+        
+        if status_result and status_result[0] == True:
+            print(f"[-] Restore Aborted: '{player_name}' is currently ONLINE.")
+            print("[!] The player must log out to the main menu before you can safely restore their gear.")
+            return False
+
         # --- DUNE PRO RULES ENGINE ---
         if apply_pro_rules:
             # 1. Check & Deduct Spice Melange Tax
-            # Assumes a currency table or a column inside characters
             cursor.execute("SELECT spice_melange FROM characters WHERE character_name = %s;", (player_name,))
             current_spice = cursor.fetchone()[0]
             
@@ -105,13 +115,11 @@ def restore_player_gear(player_name, apply_pro_rules=False, penalty_pct=0.15, sp
             cursor.execute("UPDATE characters SET spice_melange = spice_melange - %s WHERE character_name = %s;", (spice_tax, player_name))
             print(f"[❖] Taxed {spice_tax} Spice Melange from {player_name}.")
 
-            # 2. Apply Durability Penalty to the backup data before injecting
+            # 2. Apply Durability Penalty to the backup data
             inventory = backup["inventory_snapshot"]
             
-            # Unreal inventory is usually a list of item dictionaries
             if isinstance(inventory, list):
                 for item in inventory:
-                    # Look for standard durability/health keys used by Unreal Engine / Funcom
                     if "durability" in item:
                         item["durability"] = max(0, int(item["durability"] * (1.0 - penalty_pct)))
                     if "health" in item:
@@ -121,12 +129,11 @@ def restore_player_gear(player_name, apply_pro_rules=False, penalty_pct=0.15, sp
             print(f"[❖] Applied {int(penalty_pct*100)}% durability damage to items.")
         
         # --- INJECT BACK INTO THE DATABASE ---
-        # Overwrite active inventory with our snapshot
         update_query = "UPDATE characters SET inventory_data = %s WHERE character_name = %s;"
         cursor.execute(update_query, (json.dumps(backup["inventory_snapshot"]), player_name))
         
         conn.commit()
-        print(f"[+] Successfully restored gear for {player_name}!")
+        print(f"[+] Successfully restored gear for {player_name}! They can now log back in.")
         return True
 
     except Exception as e:
