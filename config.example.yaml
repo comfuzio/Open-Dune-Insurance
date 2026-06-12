@@ -1,0 +1,13 @@
+# Open Dune Insurance - Configuration File
+# Rename this file to config.yaml and place it in the same directory as the script.
+
+database:
+  host: "127.0.0.1"      # DB IP. Use 127.0.0.1 for local, or the K8s/Docker pod IP
+  port: 5432             # Standard PostgreSQL port
+  user: "postgres"       # Database username
+  password: "CHANGEME"   # Database password
+  name: "dune"           # Database name (usually 'dune' or 'dune_awakening')
+
+insurance_rules:
+  spice_tax: 100         # Amount of Spice Melange required for a Pro Restore
+  penalty_pct: 0.15      # Durability loss applied to gear (0.15 = 15% damage)
